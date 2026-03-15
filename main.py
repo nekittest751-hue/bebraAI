@@ -1,25 +1,32 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from model_manager import ModelManager
 import json
 import os
 
 app = FastAPI(title="bebraAI 1.0")
 
-# Разрешаем CORS для фронтенда Render
-frontend_url = os.getenv("FRONTEND_URL", "*")  # можно указать домен фронтенда
+# Настройка CORS
+frontend_url = os.getenv("FRONTEND_URL", "*")  # Можно "*" для теста
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[frontend_url],  # или ["*"] для теста
+    allow_origins=[frontend_url],
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# Подключаем фронтенд
+app.mount("/frontend", StaticFiles(directory="frontend"), name="frontend")
+
+# Менеджер моделей
 model_manager = ModelManager()
 
 # История чата
+os.makedirs("data", exist_ok=True)
+chat_history_file = "data/chat_history.json"
 try:
-    with open("data/chat_history.json", "r", encoding="utf-8") as f:
+    with open(chat_history_file, "r", encoding="utf-8") as f:
         chat_history = json.load(f)
 except:
     chat_history = []
@@ -39,7 +46,7 @@ async def chat(request: Request):
 
     chat_history.append({"user": message, "model": model_name, "response": response})
 
-    with open("data/chat_history.json", "w", encoding="utf-8") as f:
+    with open(chat_history_file, "w", encoding="utf-8") as f:
         json.dump(chat_history, f, ensure_ascii=False, indent=2)
 
     return {"response": response}
