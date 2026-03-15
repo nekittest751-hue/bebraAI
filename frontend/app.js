@@ -1,4 +1,4 @@
-const SERVER_URL = "https://твоя-ссылка-на-render.onrender.com"; // <- сюда ставим URL сервера
+const SERVER_URL = "https://bebraai.onrender.com"; // <- сюда ставим URL сервера
 
 async function sendMessage() {
     const msgArea = document.getElementById("userMessage");
